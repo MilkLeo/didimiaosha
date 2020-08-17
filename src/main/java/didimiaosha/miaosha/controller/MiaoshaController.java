@@ -33,17 +33,17 @@ public class MiaoshaController {
         log.info("参加秒杀的用户是：{}，秒杀的商品是：{}", userId, goodsId);
         String message = null;
         //调用redis给相应商品库存量减一
-        if (redisUtil.hasKey(userId + "_" + goodsId)) {
-            log.info("用户" + userId + "已经秒杀");
-            return "用户" + userId + "已经秒杀";
-        }
+
         Long decrByResult = Long.valueOf(redisUtil.get("goodsId_" + goodsId.toString()).toString());
         if (decrByResult > 0) {
             /**
              * 说明该商品的库存量有剩余，可以进行下订单操作
              */
             log.info("用户：{}秒杀该商品：{}库存有余，可以进行下订单操作", userId, decrByResult);
-
+            if (redisUtil.hasKey(userId + "_" + goodsId)) {
+                log.info("用户" + userId + "已经秒杀");
+                return "用户" + userId + "已经秒杀";
+            }
             redisUtil.set(userId + "_" + goodsId, null);
 
 //            rabbitTemplate.convertAndSend(RabbitConfig.STORY_EXCHANGE, RabbitConfig.STORY_ROUTING_KEY, goodsId);
@@ -79,6 +79,7 @@ public class MiaoshaController {
         redisUtil.set("goodsId_" + "3", 100);
         redisUtil.set("goodsId_" + "4", 100);
     }
+
 
 
 }
